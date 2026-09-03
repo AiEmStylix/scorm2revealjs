@@ -110,6 +110,13 @@ def build_revealjs_html(
     font-size: 14px;
     color: #666;
   }}
+  /* Prevent text overflow by enabling scroll */
+  .reveal .slides section {{
+    max-height: 100vh;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    padding-bottom: 20px;
+  }}
 </style>
 </head>
 <body>
@@ -128,7 +135,7 @@ def build_revealjs_html(
     slideNumber: true,
     transition: '{resolved_transition}',
     transitionSpeed: '{resolved_transition_speed}',
-    center: true,
+    center: false,
     math: {{
       mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
       config: 'TeX-AMS_HTML-full'

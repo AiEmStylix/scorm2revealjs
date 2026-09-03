@@ -22,9 +22,9 @@ QUY TẮC BẮT BUỘC:
 2. Giữ NGUYÊN nội dung gốc, tiếng Việt có dấu. KHÔNG thêm, bớt, hoặc bịa nội dung.
 3. Công thức toán/hoá: bọc trong \\( ... \\) (inline) hoặc \\[ ... \\] (block) — Reveal.js MathJax.
 4. Bảng → HTML <table> với class "table" (có border, dễ đọc).
-5. Animation (Fragment): Danh sách → <ul>/<ol>. Mỗi <li> thêm class="fragment fade-up" (hoặc fade-in, zoom-in...) để hiện từng ý. Các đoạn text/ảnh quan trọng cũng có thể dùng class này.
-6. Transition: Thêm thuộc tính `data-transition="fade"` (hoặc zoom, convex, concave, slide) vào `<section>` để đa dạng hoá hiệu ứng chuyển cảnh.
-7. Auto-animate: Với các slide liên tiếp có sự tiếp nối nội dung, thêm thuộc tính `data-auto-animate` vào thẻ `<section>`.
+5. BẮT BUỘC có Animation (Fragment): Mọi danh sách `<li>` và các đoạn text/ảnh quan trọng ĐỀU PHẢI có `class="fragment fade-up"` (hoặc fade-in, zoom-in) để nội dung hiện ra từ từ.
+6. Màu nền (Background): Để slide ấn tượng, hãy thêm thuộc tính `data-background-gradient` vào các `<section>` với các dải màu hiện đại, ví dụ: `linear-gradient(to bottom right, #2c3e50, #3498db)`, hoặc `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`. Hãy sáng tạo các màu gradient khác nhau cho các slide.
+7. Transition & Auto-animate: Thêm `data-transition="zoom"` (hoặc fade, convex) vào `<section>`. Nếu slide có nội dung kéo dài sang slide sau, dùng `data-auto-animate` trên cả 2 slide.
 8. Tiêu đề slide → <h2> (tiêu đề chính) hoặc <h3> (tiêu đề phụ).
 9. Đoạn văn → <p>.
 10. Ảnh/biểu đồ không trích được → ghi <p class="text-muted"><em>[Hình ảnh/biểu đồ]</em></p>.
