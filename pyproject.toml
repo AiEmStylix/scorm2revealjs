@@ -1,0 +1,31 @@
+[project]
+name = "slide2reveal"
+version = "0.1.0"
+description = "Convert PDF slides to Reveal.js presentations and package as SCORM 1.2"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    # --- Web app ---
+    "fastapi[standard]>=0.115.0",
+    "pydantic-settings>=2.5.0",
+    "python-multipart>=0.0.12",
+    "jinja2>=3.1.0",
+    # --- LLM (qua Beeknoee — OpenAI-compatible proxy) ---
+    "langchain-core>=1.3.0",
+    "langchain-openai>=1.1.15",
+    "langchain>=1.0.0",
+    "python-dotenv>=1.2.2",
+    # --- PDF processing ---
+    "pymupdf>=1.28.0",
+    "pillow>=11.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "ruff>=0.7.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

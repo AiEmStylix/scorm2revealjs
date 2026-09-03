@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{{ title }} — slide2reveal</title>
+<link rel="stylesheet" href="/static/style.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="app-container">
+  <div class="bg-gradient"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+
+  <main class="main-content">
+    <div class="header">
+      <div class="logo">
+        <span class="logo-icon">◈</span>
+        <a href="/" class="logo-text" style="text-decoration:none;color:inherit;">slide2reveal</a>
+      </div>
+    </div>
+
+    <div class="glass-card result-card">
+      <div class="result-icon">✅</div>
+      <h2 class="result-title">Chuyển đổi thành công!</h2>
+      <p class="result-subtitle">{{ title }}</p>
+
+      <div class="result-actions">
+        <a href="/preview/{{ job_id }}" target="_blank" class="btn-primary btn-preview">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px">
+            <polygon points="5,3 19,12 5,21"/>
+          </svg>
+          Xem Preview Reveal.js
+        </a>
+
+        <a href="/download/{{ job_id }}" class="btn-secondary btn-download">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7,10 12,15 17,10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Tải SCORM .zip
+        </a>
+      </div>
+
+      <div class="result-tip">
+        <strong>💡 Tip:</strong> Import file .zip vào Moodle qua
+        <em>Thêm hoạt động → Gói SCORM</em> để học viên xem bài trình chiếu trực tiếp trên LMS.
+      </div>
+
+      <a href="/" class="btn-link">← Chuyển đổi file khác</a>
+    </div>
+  </main>
+</div>
+</body>
+</html>

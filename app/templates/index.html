@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>slide2reveal — PDF → Reveal.js → SCORM</title>
+<link rel="stylesheet" href="/static/style.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div class="app-container">
+  <!-- Animated background -->
+  <div class="bg-gradient"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+
+  <main class="main-content">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">slide2reveal</span>
+      </div>
+      <p class="tagline">Chuyển đổi PDF slide thành bài trình chiếu Reveal.js tương tác<br/>
+        <span class="tagline-sub">Đóng gói SCORM 1.2 • Import vào LMS</span>
+      </p>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="glass-card">
+      <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-icon">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <polyline points="9,15 12,12 15,15"/>
+            </svg>
+          </div>
+          <p class="drop-text">Kéo thả file PDF vào đây</p>
+          <p class="drop-sub">hoặc bấm để chọn file</p>
+          <input type="file" name="file" id="fileInput" accept=".pdf" required hidden/>
+        </div>
+
+        <!-- File info (shown after selection) -->
+        <div class="file-info" id="fileInfo" style="display:none">
+          <div class="file-badge">
+            <span class="file-icon">📄</span>
+            <span class="file-name" id="fileName"></span>
+            <span class="file-size" id="fileSize"></span>
+            <button type="button" class="file-remove" id="fileRemove" title="Bỏ chọn">✕</button>
+          </div>
+        </div>
+
+        <!-- Title input -->
+        <div class="form-group">
+          <label for="titleInput" class="form-label">Tiêu đề bài giảng <span class="optional">(tuỳ chọn)</span></label>
+          <input type="text" name="title" id="titleInput" class="form-input"
+                 placeholder="Mặc định lấy từ tên file PDF"/>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-primary" id="submitBtn" disabled>
+          <span class="btn-text">Chuyển đổi</span>
+          <span class="btn-loader" style="display:none">
+            <span class="spinner"></span>
+            Đang xử lý...
+          </span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Pipeline info -->
+    <div class="pipeline-steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-info">
+          <div class="step-title">Extract</div>
+          <div class="step-desc">Vision AI đọc từng trang PDF</div>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-info">
+          <div class="step-title">Transform</div>
+          <div class="step-desc">AI chuyển thành slide Reveal.js</div>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-info">
+          <div class="step-title">Preview</div>
+          <div class="step-desc">Xem trực tiếp trên web</div>
+        </div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-info">
+          <div class="step-title">SCORM</div>
+          <div class="step-desc">Đóng gói cho LMS</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>slide2reveal • Powered by Gemini Vision AI + Reveal.js</p>
+  </footer>
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileInfo = document.getElementById('fileInfo');
+const fileName = document.getElementById('fileName');
+const fileSize = document.getElementById('fileSize');
+const fileRemove = document.getElementById('fileRemove');
+const submitBtn = document.getElementById('submitBtn');
+const uploadForm = document.getElementById('uploadForm');
+
+// Click to select
+dropZone.addEventListener('click', () => fileInput.click());
+
+// Drag & drop
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('drag-over');
+});
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) {
+    fileInput.files = e.dataTransfer.files;
+    showFileInfo(e.dataTransfer.files[0]);
+  }
+});
+
+// File selected
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) showFileInfo(fileInput.files[0]);
+});
+
+function showFileInfo(file) {
+  if (!file.name.toLowerCase().endsWith('.pdf')) {
+    alert('Chỉ chấp nhận file PDF.');
+    return;
+  }
+  fileName.textContent = file.name;
+  fileSize.textContent = formatSize(file.size);
+  fileInfo.style.display = 'block';
+  dropZone.style.display = 'none';
+  submitBtn.disabled = false;
+}
+
+fileRemove.addEventListener('click', () => {
+  fileInput.value = '';
+  fileInfo.style.display = 'none';
+  dropZone.style.display = 'flex';
+  submitBtn.disabled = true;
+});
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+// Form submit — show loading
+uploadForm.addEventListener('submit', () => {
+  submitBtn.querySelector('.btn-text').style.display = 'none';
+  submitBtn.querySelector('.btn-loader').style.display = 'inline-flex';
+  submitBtn.disabled = true;
+});
+</script>
+</body>
+</html>
