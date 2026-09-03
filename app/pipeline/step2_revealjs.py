@@ -14,20 +14,35 @@ logger = logging.getLogger(__name__)
 _REVEALJS_CDN = "https://cdn.jsdelivr.net/npm/reveal.js@6.0.1"
 
 
-def build_revealjs_html(title: str, sections_html: str, *, theme: str | None = None) -> str:
+def build_revealjs_html(
+    title: str,
+    sections_html: str,
+    *,
+    theme: str | None = None,
+    transition: str | None = None,
+    transition_speed: str | None = None,
+) -> str:
     """Ghép sections HTML vào template Reveal.js hoàn chỉnh.
 
     Args:
         title: tiêu đề bài giảng (hiện ở <title> + slide đầu nếu muốn).
         sections_html: các <section>...</section> từ step1_transform.
         theme: tên theme Reveal.js (mặc định từ settings).
+        transition: hiệu ứng chuyển cảnh (mặc định từ settings).
+        transition_speed: tốc độ chuyển cảnh (mặc định từ settings).
 
     Returns:
         Full HTML5 document string.
     """
     resolved_theme = theme or settings.revealjs_theme
+    resolved_transition = transition or settings.revealjs_transition
+    resolved_transition_speed = transition_speed or settings.revealjs_transition_speed
 
-    logger.info("[Reveal.js] Assembling HTML (theme=%s)...", resolved_theme)
+    logger.info(
+        "[Reveal.js] Assembling HTML (theme=%s, transition=%s)...",
+        resolved_theme,
+        resolved_transition,
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="vi">
@@ -111,8 +126,8 @@ def build_revealjs_html(title: str, sections_html: str, *, theme: str | None = N
   Reveal.initialize({{
     hash: true,
     slideNumber: true,
-    transition: 'slide',
-    transitionSpeed: 'default',
+    transition: '{resolved_transition}',
+    transitionSpeed: '{resolved_transition_speed}',
     center: true,
     math: {{
       mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',

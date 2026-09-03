@@ -22,12 +22,14 @@ QUY TẮC BẮT BUỘC:
 2. Giữ NGUYÊN nội dung gốc, tiếng Việt có dấu. KHÔNG thêm, bớt, hoặc bịa nội dung.
 3. Công thức toán/hoá: bọc trong \\( ... \\) (inline) hoặc \\[ ... \\] (block) — Reveal.js MathJax.
 4. Bảng → HTML <table> với class "table" (có border, dễ đọc).
-5. Danh sách → <ul>/<ol>. Mỗi <li> thêm class="fragment" để hiện từng ý khi bấm next.
-6. Tiêu đề slide → <h2> (tiêu đề chính) hoặc <h3> (tiêu đề phụ).
-7. Đoạn văn → <p>.
-8. Ảnh/biểu đồ không trích được → ghi <p class="text-muted"><em>[Hình ảnh/biểu đồ]</em></p>.
-9. Slide trống (không có chữ) → <section><h2>&nbsp;</h2></section>.
-10. KHÔNG thêm thẻ <html>, <head>, <body>, <div class="reveal">, hay bất kỳ wrapper nào. \
+5. Animation (Fragment): Danh sách → <ul>/<ol>. Mỗi <li> thêm class="fragment fade-up" (hoặc fade-in, zoom-in...) để hiện từng ý. Các đoạn text/ảnh quan trọng cũng có thể dùng class này.
+6. Transition: Thêm thuộc tính `data-transition="fade"` (hoặc zoom, convex, concave, slide) vào `<section>` để đa dạng hoá hiệu ứng chuyển cảnh.
+7. Auto-animate: Với các slide liên tiếp có sự tiếp nối nội dung, thêm thuộc tính `data-auto-animate` vào thẻ `<section>`.
+8. Tiêu đề slide → <h2> (tiêu đề chính) hoặc <h3> (tiêu đề phụ).
+9. Đoạn văn → <p>.
+10. Ảnh/biểu đồ không trích được → ghi <p class="text-muted"><em>[Hình ảnh/biểu đồ]</em></p>.
+11. Slide trống (không có chữ) → <section><h2>&nbsp;</h2></section>.
+12. KHÔNG thêm thẻ <html>, <head>, <body>, <div class="reveal">, hay bất kỳ wrapper nào. \
 Chỉ trả các thẻ <section>...</section> liền nhau.
 
 ĐỊNH DẠNG ĐẦU RA: Chỉ trả HTML thuần (các thẻ <section> liền nhau), KHÔNG markdown, \

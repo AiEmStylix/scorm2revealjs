@@ -38,6 +38,8 @@ class Settings(BaseSettings):
 
     # --- Reveal.js ---
     revealjs_theme: str = Field(default="white", alias="REVEALJS_THEME")
+    revealjs_transition: str = Field(default="slide", alias="REVEALJS_TRANSITION")
+    revealjs_transition_speed: str = Field(default="default", alias="REVEALJS_TRANSITION_SPEED")
 
     # --- Paths ---
     jobs_dir: Path = Field(default=BASE_DIR / "jobs", alias="JOBS_DIR")
