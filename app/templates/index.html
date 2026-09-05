@@ -62,6 +62,16 @@
                  placeholder="Mặc định lấy từ tên file PDF"/>
         </div>
 
+        <!-- Voice select (TTS) -->
+        <div class="form-group" id="voiceGroup">
+          <label for="voiceSelect" class="form-label">Giọng đọc <span class="optional">(TTS)</span></label>
+          <select name="voice_id" id="voiceSelect" class="form-input">
+            {% for v in tts_voices %}
+            <option value="{{ v.key }}" {% if v.key == tts_default_voice %}selected{% endif %}>{{ v.display_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
         <!-- Submit -->
         <button type="submit" class="btn-primary" id="submitBtn" disabled>
           <span class="btn-text">Chuyển đổi</span>

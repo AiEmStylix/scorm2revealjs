@@ -14,6 +14,69 @@ logger = logging.getLogger(__name__)
 _REVEALJS_CDN = "https://cdn.jsdelivr.net/npm/reveal.js@6.0.1"
 
 
+_TTS_ENGINE_JS = """\
+(function(){
+var MF=window.TTS_MANIFEST;
+if(!MF||!MF.slides){return;}
+var BASE=window.TTS_AUDIO_BASE||'';
+var au=new Audio();
+au.preload='auto';
+function stop(){
+au.pause();au.currentTime=0;
+}
+function play(p){
+if(!p){stop();return;}
+au.src=BASE+p;au.currentTime=0;
+var pr=au.play();
+if(pr&&pr.catch){pr.catch(function(){});}
+}
+function slideLines(s){
+var x=MF.slides[s];return x?x.lines:null;
+}
+Reveal.on('slidechanged',function(){
+stop();
+var s=Reveal.getIndices().h;
+var x=MF.slides[s];
+if(x&&x.fragments===false){
+var ls=x.lines||[];
+if(ls[0]){play(ls[0].audio);}
+}
+});
+Reveal.on('fragmentshown',function(e){
+var s=Reveal.getIndices().h;
+var ls=slideLines(s);
+if(!ls){return;}
+var fe=Reveal.getCurrentSlide().querySelectorAll('.fragment');
+var i;
+if(e.fragment){i=Array.prototype.indexOf.call(fe,e.fragment);}
+else{i=(Reveal.getIndices().f||1)-1;}
+if(ls[i]){play(ls[i].audio);}
+});
+Reveal.on('fragmenthidden',function(){stop();});
+})();
+"""
+
+
+def _build_tts_scripts(
+    manifest: dict | None, audio_base: str
+) -> str:
+    """Html nhúng voice_manifest + audio engine (đồng bộ giọng theo từng fragment)."""
+    if not manifest:
+        return ""
+    import json
+
+    manifest_json = json.dumps(manifest, ensure_ascii=False)
+    return (
+        "<script>window.TTS_MANIFEST="
+        + manifest_json
+        + ";window.TTS_AUDIO_BASE='"
+        + audio_base
+        + "';</script>\n<script>\n"
+        + _TTS_ENGINE_JS
+        + "\n</script>"
+    )
+
+
 def build_revealjs_html(
     title: str,
     sections_html: str,
@@ -21,6 +84,8 @@ def build_revealjs_html(
     theme: str | None = None,
     transition: str | None = None,
     transition_speed: str | None = None,
+    tts_manifest: dict | None = None,
+    tts_audio_base: str = "",
 ) -> str:
     """Ghép sections HTML vào template Reveal.js hoàn chỉnh.
 
@@ -30,6 +95,8 @@ def build_revealjs_html(
         theme: tên theme Reveal.js (mặc định từ settings).
         transition: hiệu ứng chuyển cảnh (mặc định từ settings).
         transition_speed: tốc độ chuyển cảnh (mặc định từ settings).
+        tts_manifest: voice manifest từ step1_tts (dict). None = không có giọng.
+        tts_audio_base: prefix đường dẫn audio (vd "/jobs/{id}/" cho preview, "" cho SCORM).
 
     Returns:
         Full HTML5 document string.
@@ -44,7 +111,7 @@ def build_revealjs_html(
         resolved_transition,
     )
 
-    return f"""<!DOCTYPE html>
+    html = f"""<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="utf-8"/>
@@ -129,6 +196,7 @@ def build_revealjs_html(
 <script src="{_REVEALJS_CDN}/dist/reveal.js"></script>
 <script src="{_REVEALJS_CDN}/dist/plugin/math.js"></script>
 <script src="{_REVEALJS_CDN}/dist/plugin/highlight.js"></script>
+<!--TTS_BLOCK-->
 <script>
   Reveal.initialize({{
     hash: true,
@@ -145,3 +213,9 @@ def build_revealjs_html(
 </script>
 </body>
 </html>"""
+
+    html = html.replace(
+        "<!--TTS_BLOCK-->",
+        _build_tts_scripts(tts_manifest, tts_audio_base),
+    )
+    return html

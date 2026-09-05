@@ -191,13 +191,15 @@ def build_manifest_xml(identifier: str, title: str) -> str:
 """
 
 
-def pack_scorm(title: str, revealjs_html: str, output_path: Path) -> Path:
+def pack_scorm(title: str, revealjs_html: str, output_path: Path, *, assets_dir: Path | None = None) -> Path:
     """Đóng gói SCORM 1.2: Reveal.js HTML + manifest + scorm_api.js → .zip.
 
     Args:
         title: tiêu đề bài giảng (dùng cho manifest).
         revealjs_html: full Reveal.js HTML từ step2.
         output_path: đường dẫn file .zip đầu ra.
+        assets_dir: thư mục asset cần đóng gói kèm (vd thư mục audio/ của TTS) — giữ nguyên
+            cấu trúc tương đối để đường dẫn tương đối trong HTML chạy được trong .zip.
 
     Returns:
         Path tới file .zip đã tạo.
@@ -216,6 +218,17 @@ def pack_scorm(title: str, revealjs_html: str, output_path: Path) -> Path:
     (build_dir / "imsmanifest.xml").write_text(
         build_manifest_xml(identifier, title), encoding="utf-8"
     )
+
+    # Copy assets (audio TTS) GIỮ NGUYÊN thư mục gốc. Ví dụ assets_dir=".../audio" có
+    # "<hash>.wav" → build/audio/<hash>.wav — khớp đường dẫn tương đối "audio/<hash>.wav"
+    # trong HTML/manifest (khi mở SCORM offline).
+    if assets_dir and assets_dir.exists():
+        for file_path in assets_dir.rglob("*"):
+            if file_path.is_file():
+                rel = file_path.relative_to(assets_dir)
+                dest = build_dir / assets_dir.name / rel
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(file_path, dest)
 
     # Nén zip
     output_path.parent.mkdir(parents=True, exist_ok=True)

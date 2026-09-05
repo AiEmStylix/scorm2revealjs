@@ -276,6 +276,14 @@ body {
   border-color: var(--color-primary-light);
   box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
+select.form-input {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--color-text-dim) 50%), linear-gradient(135deg, var(--color-text-dim) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+select.form-input option { color: #111; }
 
 /* --- Buttons --- */
 .btn-primary {
@@ -432,6 +440,33 @@ body {
   font-size: 15px;
   margin: 0 0 28px;
 }
+.tts-warning {
+  margin: 0 0 20px;
+  padding: 14px 18px;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: #fcd34d;
+  text-align: left;
+  line-height: 1.6;
+}
+.tts-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 0 0 24px;
+}
+.tts-stat {
+  padding: 10px 16px;
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+}
+.tts-label { color: var(--color-text-dim); margin-right: 6px; }
+.tts-value { font-weight: 700; }
 .result-actions {
   display: flex;
   flex-direction: column;

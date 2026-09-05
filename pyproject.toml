@@ -18,7 +18,17 @@ dependencies = [
     # --- PDF processing ---
     "pymupdf>=1.28.0",
     "pillow>=11.0.0",
+    # --- TTS ---
+    "beautifulsoup4>=4.12.0",
+    "numpy>=1.26.0",
+    "soundfile>=0.12.0",
+    "openai>=1.55.0",
 ]
+
+[project.optional-dependencies]
+# Google Cloud TTS native (vi-VN-Chirp3-HD) — cần GOOGLE_APPLICATION_CREDENTIALS.
+# Mặc định project dùng Beeknoee (OpenAI-compat /audio/speech) nên không bắt buộc cái này.
+google-tts = ["google-cloud-texttospeech>=2.20.0"]
 
 [dependency-groups]
 dev = [

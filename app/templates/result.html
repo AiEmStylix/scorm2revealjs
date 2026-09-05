@@ -26,6 +26,20 @@
       <h2 class="result-title">Chuyển đổi thành công!</h2>
       <p class="result-subtitle">{{ title }}</p>
 
+      {% if tts %}
+      {% if tts.failed %}
+      <div class="tts-warning">
+        ⚠️ Giọng đọc chưa đầy đủ: <strong>{{ tts.ok_lines }}/{{ tts.ok_lines + tts.failed }}</strong> dòng thành công,
+        {{ tts.failed }} dòng lỗi (provider tạm ngừng). Hãy bấm Chuyển đổi lại — các dòng đã đọc sẽ được dùng lại, không tốn tiền.
+      </div>
+      {% endif %}
+      <div class="tts-stats">
+        <div class="tts-stat"><span class="tts-label">Giọng đọc</span><span class="tts-value">{{ tts.provider }} · {{ tts.chars }} ký tự</span></div>
+        <div class="tts-stat"><span class="tts-label">Chi phí (vốn)</span><span class="tts-value">{{ tts.cost_vendor_vnd }} đ</span></div>
+        <div class="tts-stat"><span class="tts-label">Thu user</span><span class="tts-value">{{ tts.cost_charged_vnd }} đ</span></div>
+      </div>
+      {% endif %}
+
       <div class="result-actions">
         <a href="/preview/{{ job_id }}" target="_blank" class="btn-primary btn-preview">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px">
