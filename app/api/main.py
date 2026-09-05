@@ -22,6 +22,9 @@ app = FastAPI(title="slide2reveal", description="PDF → Reveal.js → SCORM")
 _APP_DIR = Path(__file__).resolve().parent.parent
 app.mount("/static", StaticFiles(directory=_APP_DIR / "static"), name="static")
 
+# Serve jobs dir (audio TTS cho preview) — audio chỉ đọc, không bảo mật tool nội bộ.
+app.mount("/jobs", StaticFiles(directory=settings.jobs_dir), name="jobs")
+
 # Jinja2 Environment — manual setup to avoid Python 3.14 Starlette/Jinja2 cache bug.
 # (Starlette's Jinja2Templates injects url_for as a dict-valued global, which creates
 # unhashable tuple keys in the template cache on Python 3.14.)
@@ -50,11 +53,23 @@ def _job_dir(job_id: str) -> Path:
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     """Trang chủ — upload PDF."""
-    return _render("index.html")
+    from app.core.tts_config import get_config
+
+    cfg = get_config()
+    return _render(
+        "index.html",
+        tts_voices=cfg.all_voices(),
+        tts_default_voice=cfg.default_voice,
+    )
 
 
 @app.post("/convert")
-async def convert(request: Request, file: UploadFile = File(...), title: str = Form("")):
+async def convert(
+    request: Request,
+    file: UploadFile = File(...),
+    title: str = Form(""),
+    voice_id: str = Form(""),
+):
     """Nhận PDF, chạy pipeline, trả job info."""
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Chỉ nhận file PDF.")
@@ -74,8 +89,11 @@ async def convert(request: Request, file: UploadFile = File(...), title: str = F
 
     try:
         # === PIPELINE ===
+        from app.core.tts_config import resolve as tts_resolve
+        from app.core.usage import TTSUsage
         from app.pipeline.step0_extract import extract_pdf
         from app.pipeline.step1_transform import transform_to_revealjs
+        from app.pipeline.step1_tts import synthesize_tts
         from app.pipeline.step2_revealjs import build_revealjs_html
         from app.pipeline.step3_scorm import pack_scorm
 
@@ -89,28 +107,58 @@ async def convert(request: Request, file: UploadFile = File(...), title: str = F
         sections_html = transform_to_revealjs(markdown)
         (work_dir / "sections.html").write_text(sections_html, encoding="utf-8")
 
+        # Step 1.5: TTS — mỗi fragment của mỗi slide → audio WAV + voice_manifest.json
+        logger.info("[Job %s] Step 1.5: Synthesizing TTS...", job_id)
+        audio_dir = work_dir / "audio"
+        usage = TTSUsage()
+        # Validate sớm voice_id (nếu lệch → raise rõ ràng, không đọc giọng khác).
+        if voice_id:
+            tts_resolve(voice_id)
+        tts_manifest = synthesize_tts(
+            sections_html, audio_dir, voice_id=voice_id, usage=usage
+        )
+        from app.pipeline.step1_tts import write_manifest
+
+        write_manifest(tts_manifest, work_dir / "voice_manifest.json")
+        usage.write(work_dir / "tts_usage.json")
+
         # Step 2: Assemble full Reveal.js
         logger.info("[Job %s] Step 2: Building Reveal.js HTML...", job_id)
-        full_html = build_revealjs_html(resolved_title, sections_html)
+        # Preview dùng đường dẫn tuyệt đối qua /jobs/{id}/ (serve tĩnh) + audio tương đối.
+        preview_html = build_revealjs_html(
+            resolved_title,
+            sections_html,
+            tts_manifest=tts_manifest,
+            tts_audio_base=f"/jobs/{job_id}/",
+        )
         revealjs_path = work_dir / "presentation.html"
-        revealjs_path.write_text(full_html, encoding="utf-8")
+        revealjs_path.write_text(preview_html, encoding="utf-8")
 
-        # Step 3: SCORM packaging
+        # Step 3: SCORM packaging — dùng đường dẫn tương đối (audio nằm cạnh index.html trong zip).
         logger.info("[Job %s] Step 3: Packing SCORM...", job_id)
+        scorm_html = build_revealjs_html(
+            resolved_title, sections_html, tts_manifest=tts_manifest, tts_audio_base=""
+        )
         scorm_path = work_dir / f"{resolved_title}_scorm.zip"
-        pack_scorm(resolved_title, full_html, scorm_path)
+        pack_scorm(resolved_title, scorm_html, scorm_path, assets_dir=audio_dir)
 
         _jobs[job_id] = {
             "title": resolved_title,
             "status": "done",
             "revealjs_path": str(revealjs_path),
             "scorm_path": str(scorm_path),
+            "tts": usage.to_dict(),
         }
 
         logger.info("[Job %s] ✅ Pipeline complete!", job_id)
 
         # Trả trang kết quả
-        return _render("result.html", job_id=job_id, title=resolved_title)
+        return _render(
+            "result.html",
+            job_id=job_id,
+            title=resolved_title,
+            tts=usage.to_dict(),
+        )
 
     except Exception as e:
         logger.exception("[Job %s] Pipeline failed: %s", job_id, e)
